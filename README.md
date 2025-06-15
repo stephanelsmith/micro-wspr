@@ -25,8 +25,10 @@ In practice this means we:
 - [WsprSharp](https://github.com/swharden/WsprSharp) a C# WSPR implmentation
     - [WSPR Code Generator](https://swharden.com/software/wspr-code-generator/) online code generator based on WsprSharp
 - [FSKview](https://swharden.com/software/FSKview/wspr/) spectrogram for viewing frequency-shift keyed (FSK) signals in real time
-- [genwspr](https://github.com/brainwagon/genwspr) Python 2 WSPR encoder.
-- [wspr](https://github.com/PH0TRA/wspr) Python 3 WSPR encoder (same as genwspr).
+- [genwspr.py](https://github.com/brainwagon/genwspr) Python 2 WSPR encoder by Mark VandeWettering K6HX.
+	- [genwsprcode.py](https://github.com/PH0TRA/wspr) Converted genwspr to python3.
+	- [Raspberry Pi version](https://blog.marxy.org/2024/09/python-code-to-generate-wspr-audio-tones.html)
+		- [wsprgen.py](https://gist.github.com/peterbmarks/339e5ae83b5351151137679b8f527466)
 
 ## License
 MIT License
