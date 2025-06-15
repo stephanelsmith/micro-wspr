@@ -25,9 +25,8 @@ In practice this means we:
 - [WsprSharp](https://github.com/swharden/WsprSharp) a C# WSPR implmentation
     - [WSPR Code Generator](https://swharden.com/software/wspr-code-generator/) online code generator based on WsprSharp
 - [FSKview](https://swharden.com/software/FSKview/wspr/) spectrogram for viewing frequency-shift keyed (FSK) signals in real time
-### Python Based Reference Examples
-    - [genwspr](https://github.com/brainwagon/genwspr) in Python 2.
-    - [wspr](https://github.com/PH0TRA/wspr) ported version above to Python 3.
+- [genwspr](https://github.com/brainwagon/genwspr) Python 2 WSPR encoder.
+- [wspr](https://github.com/PH0TRA/wspr) Python 3 WSPR encoder (same as genwspr).
 
 ## License
 MIT License
