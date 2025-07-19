@@ -1,0 +1,5 @@
+
+
+
+echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -t null -t -
+

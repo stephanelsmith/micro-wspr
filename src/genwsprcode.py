@@ -173,7 +173,6 @@ class Genwsprcode:
 
         return(symbols)
 
-        # $Log$
 x = Genwsprcode(callsign = 'K1ABC',
                 grid     = 'FN42',
                 power    = '37',
