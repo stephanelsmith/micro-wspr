@@ -18,6 +18,12 @@ from lib.compat import get_stdin_streamreader
 
 from wspr.wspr_decode import WSPR
 
+try:
+    from rich import print
+except ImportError:
+    pass
+
+
 if not IS_UPY:
     import wave
     # from subprocess import check_output
@@ -56,8 +62,9 @@ async def afsk_mod(wspr_q,
             wsprstr = await wspr_q.get()
 
             try:
-                wspr = WSPR(wsprstr = wsprstr,
-                            verbose = True,)
+                wspr = WSPR(wsprstr  = wsprstr,
+                            verbose  = True,
+                            )
 
             except asyncio.CancelledError:
                 raise
@@ -91,6 +98,8 @@ async def main():
 
     # AFSK queue, the samples, each item is a tuple: (array['i'], size), queued in from afsk_mod and out in afsk_out
     afsk_q = Queue() # afsk output queue
+
+    # print("Hello, [bold magenta]World[/bold magenta]!")
 
     tasks = []
     try:

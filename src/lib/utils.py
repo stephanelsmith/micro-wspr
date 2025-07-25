@@ -2,6 +2,11 @@
 import sys
 import math
 
+try:
+    from rich import print
+except ImportError:
+    pass
+
 
 # integer division + ceil operation
 # used in place of int(math.ceil(total_size/chunk_size))
