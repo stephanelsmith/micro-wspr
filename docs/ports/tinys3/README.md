@@ -5,7 +5,7 @@
 TinyS3 is available through [UnexpectedMaker's store](https://unexpectedmaker.com/) directy, Mouser Digkey, Sparkfun and others. He's got tons of other great boards to check out to!
 
 <p align="center">
-  <img src="https://github.com/stephanelsmith/micro-aprs/blob/master/docs/ports/tinys3/pins_tinys3.jpg?raw=true" alt="" width="600"/>
+  <img src="https://github.com/stephanelsmith/micro-wspr/blob/master/docs/ports/tinys3/pins_tinys3.jpg?raw=true" alt="" width="600"/>
 </p>
 
 ## :hammer: Building Micropython Firware for TinyS3
@@ -24,7 +24,7 @@ source export.sh
 ```
 From here on, you will need to source ```export.sh``` to setup your environment.
 
-#### Now clone the (intbioncs) Micropython repo
+#### Now clone the Micropython repo
 ```
 git clone git@github.com:micropython/micropython.git micropython
 cd micropython
@@ -34,14 +34,14 @@ cd ports/esp32
 ```
 From here, the commands assume the current working directory is ```micropython/ports/esp32```.
 
-#### Add the board file from the aprs-micro folder into the micropython build folder
+#### Add the board file from the micro-wspr folder into the micropython build folder
 ```
-ln -sf ~/micro-aprs/upy/boards/SS_TINYS3 boards/.
+ln -sf ~/micro-wspr/upy/boards/SS_TINYS3 boards/.
 ```
 
 #### Build micropython port with C modules
 ```
-make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-aprs/upy/c_modules/esp32.cmake
+make BOARD=SS_TINYS3 USER_C_MODULES=~/micro-wspr/upy/c_modules/esp32.cmake
 ```
 
 OR, try the vanilla TinyS3 board (already included in the Micropython project.)
@@ -70,17 +70,6 @@ import tinys3
 
 The output is on ```IO1```.
 
-## Output AFSK waveforms
 
-### Output afsk waveform (@22.05kHz)
-#### Yellow line is raw output
-#### Blue line after a LPF filter, [as described in the DAC section](../dac/README.md).
-<img src="out1.jpg" width="600">
-
-#### Slightly more zoomed in view
-<img src="out2.jpg" width="600">
-
-## :raised_hands: Acknowledgements
-- Images and information from [TinyS3 and the Unexpected Maker Store](https://esp32s3.com/tinys3.html).  Go buy some kit!
 
 
