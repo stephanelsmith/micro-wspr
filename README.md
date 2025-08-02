@@ -17,6 +17,11 @@ In practice this means we:
 ## :mortar_board: Tutorials
 
 ## :horse_racing: **Start here!**
+Basic command line for encoding and APRS strings to AFSK audio samples and the reverse.
+* [Micropython](docs/ports/upy/README.md) unix build instructions, and encode/decode examples via cli.
+* [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
+* [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
+
 
 ## :raised_hands: Acknowledgements
 - [Micropython](https://github.com/micropython/micropython) project
