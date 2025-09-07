@@ -21,6 +21,7 @@ Basic command line for encoding and APRS strings to AFSK audio samples and the r
 * [Micropython](docs/ports/upy/README.md) unix build instructions, and encode/decode examples via cli.
 * [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
 * [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
+* [TinyC6](docs/ports/tinyc6/README.md), ESP32C6 build isntructions on the TinyC6 (ESP32-C6).
 
 
 ## :raised_hands: Acknowledgements
