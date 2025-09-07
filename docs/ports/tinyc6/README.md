@@ -49,13 +49,13 @@ make BOARD=UM_TINYC6
 #### Flash the esp32 chip.
 Before flashing the ESP32C6 needs to be in the bootloader.  This is done by holding the ```boot``` button and clicking ```reset```.  You can find the right comm port with ```py -m serial.tools.list_ports```.  You may need to ```py -m pip install pyserial``` first.
 ```
-py -m esptool --chip esp32c6 --port COM4 write_flash -z 0 .\micropython\ports\esp32\build-SS_WSPR_TINYC6\firmware.bin
+py -m esptool --chip esp32c6 --port COM23 write_flash -z 0 .\micropython\ports\esp32\build-SS_WSPR_TINYC6\firmware.bin
 ```
 
 
 ## :runner: Trying the TinyC6 Port
 Fire up a terminal and connect to the device (use ```py -m serial.tools.list_ports``` to find the COM port)
 ```
-py -m serial.tools.miniterm COM20
+py -m serial.tools.miniterm COM23
 ```
 
