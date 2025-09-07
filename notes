@@ -8,3 +8,10 @@ i2c.scan() # mia address is 66 or 0x42
 i2c.readfrom_mem(0x42, 0xfd, 2)
 i2c.readfrom_mem(0x42, 0xff, 2)
 
+########### NEOPIXEL #############                                                                                                       from machine import Pin
+from neopixel import NeoPixel
+import board
+pwr = Pin(board.LED_PWR_EN, Pin.OUT, value=1)
+neo = NeoPixel(Pin(board.LED_DAT), board.LED_LENGTH)
+neo[0] = (0,50 ,100, 100)
+neo.write()
