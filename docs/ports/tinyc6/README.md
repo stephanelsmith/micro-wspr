@@ -1,5 +1,9 @@
 # TinyC6
 
+<p align="center">
+  <img src="https://github.com/stephanelsmith/micro-wspr/blob/master/docs/ports/tinyc6/3960737589.jpg?raw=true" alt="" width="600"/>
+</p>
+
 ## :hammer: Building Micropython Firware for TinyC6
 #### Install pre-reqs
 ```
