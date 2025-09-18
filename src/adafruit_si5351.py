@@ -109,6 +109,9 @@ _SI5351_REGISTER_170_CLK5_INITIAL_PHASE_OFFSET = const(170)
 _SI5351_REGISTER_177_PLL_RESET = const(177)
 _SI5351_REGISTER_183_CRYSTAL_INTERNAL_LOAD_CAPACITANCE = const(183)
 
+_SI5351_PLL_A = const(26)
+_SI5351_PLL_B = const(34)
+
 # User-facing constants:
 R_DIV_1 = 0
 R_DIV_2 = 1
@@ -467,4 +470,3 @@ class SI5351:
             https://groups.io/g/BITX20/topic/si5351a_facts_and_myths/5430607
         """
         self._write_u8(_SI5351_REGISTER_177_PLL_RESET, (1 << 7) | (1 << 5))
-
