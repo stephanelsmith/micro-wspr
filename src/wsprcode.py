@@ -173,12 +173,14 @@ async def main():
                            grid     = grid,
                            power    = power) as gen:
         syms = [sym for sym in gen.gen_symbols()]
+        print('BY GRID')
         print(syms)
 
     async with GenWSPRCode(callsign = callsign, 
                            latlon   = latlon,
                            power    = power) as gen:
         syms = [sym for sym in gen.gen_symbols()]
+        print('BY LATLON')
         print(syms)
 
 if __name__ == "__main__":
