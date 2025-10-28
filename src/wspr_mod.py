@@ -17,6 +17,7 @@ from lib.compat import print_exc
 from lib.compat import get_stdin_streamreader
 
 from wspr.wspr_decode import WSPR
+from wspr.wsprcode import GenWSPRCode
 
 try:
     from rich import print
@@ -51,11 +52,11 @@ async def read_wspr_from_pipe(wspr_q,
     except Exception as err:
         print_exc(err)
 
-async def afsk_mod(wspr_q,
-                   afsk_q,
-                   rate    = 22050,
-                   verbose = False,
-                   ):
+async def wspr_encoder(wspr_q,
+                       afsk_q,
+                       rate    = 22050,
+                       verbose = False,
+                       ):
     try:
         while True:
             # get wspr from input
@@ -73,8 +74,15 @@ async def afsk_mod(wspr_q,
                 continue
             
             print(wspr)
+            async with GenWSPRCode(callsign = wspr.src, 
+                                   grid     = wspr.pos,
+                                   power    = wspr.pwr) as gen:
+                # syms = [sym for sym in gen.gen_symbols()]
+                for s in gen.gen_symbols():
+                    print(s,end=' ')
 
             wspr_q.task_done()
+            print('')
 
     except asyncio.CancelledError:
         raise
@@ -93,10 +101,10 @@ async def main():
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
-    # WSPR queue, these items are queued in from stdin and out in afsk_mod
+    # WSPR queue, these items are queued in from stdin and out in wspr_encoder
     wspr_q = Queue()
 
-    # AFSK queue, the samples, each item is a tuple: (array['i'], size), queued in from afsk_mod and out in afsk_out
+    # AFSK queue, the samples, each item is a tuple: (array['i'], size), queued in from wspr_encoder and out in afsk_out
     afsk_q = Queue() # afsk output queue
 
     # print("Hello, [bold magenta]World[/bold magenta]!")
@@ -104,12 +112,12 @@ async def main():
     tasks = []
     try:
 
-        # afsk_mod, convert WSPR messages into AFSK samples
-        tasks.append(asyncio.create_task(afsk_mod(wspr_q, 
-                                                  afsk_q, 
-                                                  rate    = args['args']['rate'],
-                                                  verbose = args['args']['verbose'],
-                                                  )))
+        # wspr_encoder, convert WSPR messages into AFSK samples
+        tasks.append(asyncio.create_task(wspr_encoder(wspr_q, 
+                                                    afsk_q, 
+                                                    rate    = args['args']['rate'],
+                                                    verbose = args['args']['verbose'],
+                                                    )))
 
 
         # read all items from pipe, returns EOF

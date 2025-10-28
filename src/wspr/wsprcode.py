@@ -18,7 +18,7 @@ import sys, string
 import asyncio
 from array import array
 
-syncv = array('B',[1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1,
+SYNCV = array('B',[1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1,
          1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
          1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0,
          1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0,
@@ -28,7 +28,7 @@ syncv = array('B',[1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0
 
 # Precompute reverse index for interleaving
 # self.ridx = list(filter(lambda x: x < 162, map(self.bitreverse, range(256))))
-ridx = array('H', [0, 128, 64, 32, 160, 96, 16, 144, 80, 48, 112, 8, 136, 72, 40, 104, 24, 152, 88, 56, 120, 4, 132, 68, 36, 100, 20, 148, 84, 52, 116, 12, 140, 76, 44, 108, 28, 156, 92, 60, 124, 2, 130, 66, 34, 98, 18, 146, 82, 50, 114, 10, 138, 74, 42, 106, 26, 154, 90, 58, 122, 6, 134, 70, 38, 102, 22, 150, 86, 54, 118, 14, 142, 78, 46, 110, 30, 158, 94, 62, 126, 1, 129, 65, 33, 161, 97, 17, 145, 81, 49, 113, 9, 137, 73, 41, 105, 25, 153, 89, 57, 121, 5, 133, 69, 37, 101, 21, 149, 85, 53, 117, 13, 141, 77, 45, 109, 29, 157, 93, 61, 125, 3, 131, 67, 35, 99, 19, 147, 83, 51, 115, 11, 139, 75, 43, 107, 27, 155, 91, 59, 123, 7, 135, 71, 39, 103, 23, 151, 87, 55, 119, 15, 143, 79, 47, 111, 31, 159, 95, 63, 127])
+RIDX = array('H', [0, 128, 64, 32, 160, 96, 16, 144, 80, 48, 112, 8, 136, 72, 40, 104, 24, 152, 88, 56, 120, 4, 132, 68, 36, 100, 20, 148, 84, 52, 116, 12, 140, 76, 44, 108, 28, 156, 92, 60, 124, 2, 130, 66, 34, 98, 18, 146, 82, 50, 114, 10, 138, 74, 42, 106, 26, 154, 90, 58, 122, 6, 134, 70, 38, 102, 22, 150, 86, 54, 118, 14, 142, 78, 46, 110, 30, 158, 94, 62, 126, 1, 129, 65, 33, 161, 97, 17, 145, 81, 49, 113, 9, 137, 73, 41, 105, 25, 153, 89, 57, 121, 5, 133, 69, 37, 101, 21, 149, 85, 53, 117, 13, 141, 77, 45, 109, 29, 157, 93, 61, 125, 3, 131, 67, 35, 99, 19, 147, 83, 51, 115, 11, 139, 75, 43, 107, 27, 155, 91, 59, 123, 7, 135, 71, 39, 103, 23, 151, 87, 55, 119, 15, 143, 79, 47, 111, 31, 159, 95, 63, 127])
 
 
 class GenWSPRCode:
@@ -37,9 +37,20 @@ class GenWSPRCode:
                        power, 
                        grid   = None,
                        latlon = None):
-        self.callsign = callsign
-        self.grid = grid
-        self.latlon = latlon
+        if isinstance(callsign, (bytes, bytearray)):
+            self.callsign = callsign.decode()
+        elif isinstance(callsign, str):
+            self.callsign = callsign
+        else:
+            raise Exception('callsign should be str, byte, bytearray')
+
+        if isinstance(grid, bytes) or isinstance(grid, bytearray):
+            self.grid = grid.decode()
+        elif isinstance(grid, str):
+            self.grid = grid
+        if isinstance(latlon, (list,tuple)):
+            self.latlon = latlon
+
         self.power = power
 
         # Validate and encode inputs
@@ -65,9 +76,9 @@ class GenWSPRCode:
         # Interleave
         msg = array('b', [0 for x in range(162)])
         for i in range(162):
-            msg[ridx[i]] = encoded[i]
+            msg[RIDX[i]] = encoded[i]
         for i in range(162):
-            yield 2*msg[i]+syncv[i]
+            yield 2*msg[i]+SYNCV[i]
 
     @staticmethod
     def normalize_callsign(callsign):
@@ -161,7 +172,6 @@ class GenWSPRCode:
         bs = cls.bitstring(x)
         return int(bs[::-1], 2)
 
-
 async def main():
 
     callsign = 'K1ABC'
@@ -170,15 +180,15 @@ async def main():
     power = '37'
 
     async with GenWSPRCode(callsign = callsign, 
-                           grid     = grid,
-                           power    = power) as gen:
+                        grid     = grid,
+                        power    = power) as gen:
         syms = [sym for sym in gen.gen_symbols()]
         print('BY GRID')
         print(syms)
 
     async with GenWSPRCode(callsign = callsign, 
-                           latlon   = latlon,
-                           power    = power) as gen:
+                        latlon   = latlon,
+                        power    = power) as gen:
         syms = [sym for sym in gen.gen_symbols()]
         print('BY LATLON')
         print(syms)
