@@ -1,13 +1,11 @@
 
 import sys
 import asyncio
-import struct
 
 from lib.compat import Queue
 
 import lib.upydash as _
 from lib.parse_args import mod_parse_args
-from lib.utils import pretty_binary
 
 from lib.utils import eprint # debug print to stderr, reserve stdout for pipe
 
@@ -16,14 +14,13 @@ from lib.compat import IS_UPY
 from lib.compat import print_exc
 from lib.compat import get_stdin_streamreader
 
-from wspr.wspr_decode import WSPR
-from wspr.wsprcode import GenWSPRCode
+from wspr import WSPR
+from wspr.encoder import GenWSPRCode
 
 try:
     from rich import print
 except ImportError:
     pass
-
 
 if not IS_UPY:
     import wave
@@ -52,11 +49,17 @@ async def read_wspr_from_pipe(wspr_q,
     except Exception as err:
         print_exc(err)
 
+async def outputter(code_q,
+                    out_file = '-', # - | null
+                    verbose = False,
+                    ):
+    write = sys.stdout.buffer.write
+
 async def wspr_encoder(wspr_q,
-                       afsk_q,
-                       rate    = 22050,
+                       code_q,
                        verbose = False,
                        ):
+    write = sys.stdout.buffer.write
     try:
         while True:
             # get wspr from input
@@ -72,17 +75,20 @@ async def wspr_encoder(wspr_q,
             except Exception as err:
                 eprint('# bad wspr input string:{}\n{}'.format(wsprstr,err))
                 continue
-            
-            print(wspr)
+           
+            eprint('===== WSPR ENCODE >>>>>',end=' ')
+            eprint(wspr)
             async with GenWSPRCode(callsign = wspr.src, 
                                    grid     = wspr.pos,
                                    power    = wspr.pwr) as gen:
-                # syms = [sym for sym in gen.gen_symbols()]
-                for s in gen.gen_symbols():
-                    print(s,end=' ')
+                # for s in gen.gen_symbols():
+                    # await code_q.put(s)
+                for i,s in enumerate(gen.gen_symbols()):
+                    if verbose:
+                        eprint(s, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
+                    write(s.to_bytes(2, 'little', signed=False))
 
             wspr_q.task_done()
-            print('')
 
     except asyncio.CancelledError:
         raise
@@ -97,35 +103,30 @@ async def main():
 
     eprint('# WSPR MOD')
     # eprint(args)
-    eprint('# RATE {}'.format(args['args']['rate']))
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
     # WSPR queue, these items are queued in from stdin and out in wspr_encoder
     wspr_q = Queue()
-
-    # AFSK queue, the samples, each item is a tuple: (array['i'], size), queued in from wspr_encoder and out in afsk_out
-    afsk_q = Queue() # afsk output queue
-
-    # print("Hello, [bold magenta]World[/bold magenta]!")
+    code_q = Queue()
 
     tasks = []
     try:
-
+        tasks.append(asyncio.create_task(outputter(code_q,
+                                                   out_file = args['out']['file'],
+                                                   verbose = args['args']['verbose'],
+                                                   )))
         # wspr_encoder, convert WSPR messages into AFSK samples
         tasks.append(asyncio.create_task(wspr_encoder(wspr_q, 
-                                                    afsk_q, 
-                                                    rate    = args['args']['rate'],
-                                                    verbose = args['args']['verbose'],
-                                                    )))
-
+                                                      code_q,
+                                                      verbose = args['args']['verbose'],
+                                                      )))
 
         # read all items from pipe, returns EOF
         await read_wspr_from_pipe(wspr_q)
 
         # wait until queues are done
         await wspr_q.join()
-        # await afsk_q.join()
 
     except Exception as err:
         print_exc(err)
