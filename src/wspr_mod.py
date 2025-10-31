@@ -51,15 +51,31 @@ async def read_wspr_from_pipe(wspr_q,
 
 async def outputter(code_q,
                     out_file = '-', # - | null
-                    verbose = False,
+                    Tsym     = 0,   # ms delay between each symbol
+                    verbose  = False,
                     ):
     write = sys.stdout.buffer.write
+    flush = sys.stdout.buffer.flush
+    try:
+        while True:
+            b = await code_q.get()
+            for i,s in enumerate(b):
+                if verbose:
+                    eprint(s, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
+                write(s.to_bytes(2, 'little', signed=False))
+                flush()
+                await asyncio.sleep(Tsym/1000)
+            code_q.task_done()
+    except asyncio.CancelledError:
+        raise
+    except Exception as err:
+        print_exc(err)
+
 
 async def wspr_encoder(wspr_q,
                        code_q,
                        verbose = False,
                        ):
-    write = sys.stdout.buffer.write
     try:
         while True:
             # get wspr from input
@@ -81,12 +97,11 @@ async def wspr_encoder(wspr_q,
             async with GenWSPRCode(callsign = wspr.src, 
                                    grid     = wspr.pos,
                                    power    = wspr.pwr) as gen:
-                # for s in gen.gen_symbols():
-                    # await code_q.put(s)
-                for i,s in enumerate(gen.gen_symbols()):
-                    if verbose:
-                        eprint(s, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
-                    write(s.to_bytes(2, 'little', signed=False))
+                b = bytearray(s for s in gen)
+                await code_q.put(b)
+
+            # wait until queues are done
+            await code_q.join()
 
             wspr_q.task_done()
 
@@ -102,7 +117,7 @@ async def main():
         return
 
     eprint('# WSPR MOD')
-    # eprint(args)
+    eprint(args)
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
@@ -114,7 +129,8 @@ async def main():
     try:
         tasks.append(asyncio.create_task(outputter(code_q,
                                                    out_file = args['out']['file'],
-                                                   verbose = args['args']['verbose'],
+                                                   Tsym     = args['args']['Tsym'], 
+                                                   verbose  = args['args']['verbose'],
                                                    )))
         # wspr_encoder, convert WSPR messages into AFSK samples
         tasks.append(asyncio.create_task(wspr_encoder(wspr_q, 

@@ -14,7 +14,7 @@ def mod_parse_args(args):
         'args' : {
             'verbose' : False,
             'quiet'   : False,
-            'options' : {},
+            'Tsym'    : 0,
         },
         'in' : {
             'file'  : '-', #from stdin
@@ -38,6 +38,7 @@ wspr_mod.py
 
 OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
+-Tsym            Symbol period in ms.  default 0. Use 'wspr' for standard ~687ms period
 
 -t INPUT TYPE OPTIONS:
 infile       '-' (default)
@@ -56,6 +57,13 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
+        if '-Tsym' in args:
+            r['args']['Tsym'] = get_arg_val(args, '-Tsym')
+            if r['args']['Tsym'] == 'wspr':
+                r['args']['Tsym'] = 110.6/162*1000 # wspr period
+            else:
+                r['args']['Tsym'] = int(r['args']['Tsym'])
+
     except IndexError:
         pass
     if len(spl) == 2:
@@ -80,7 +88,6 @@ def tone_parse_args(args):
             'verbose' : False,
             'quiet'   : False,
             'rate'    : 22050,
-            'options' : {},
         },
         'in' : {
             'file'  : '-', #from stdin
@@ -144,4 +151,13 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
         pass
     return r
 
+
+def get_arg_val(args, arg, fn=None):
+    try:
+        if not fn:
+            return args[args.index(arg)+1]
+        else:
+            return fn(args[args.index(arg)+1])
+    except:
+        None
 

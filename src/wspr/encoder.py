@@ -18,6 +18,8 @@ import sys, string
 import asyncio
 from array import array
 
+WSPR_SYMBOL_COUNT = 162
+
 SYNCV = array('B',[1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1,
          1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
          1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0,
@@ -69,16 +71,19 @@ class GenWSPRCode:
     async def __aexit__(self, *args):
         pass
 
-    def gen_symbols(self):
+    # iterable of symbols of len 162
+    def __iter__(self):
         message = self.callsign_bin + self.latlon_bin + self.power_bin + 31 * '0'
         encoded = self.encode(message)
 
         # Interleave
-        msg = array('b', [0 for x in range(162)])
-        for i in range(162):
+        msg = array('b', [0 for x in range(WSPR_SYMBOL_COUNT)])
+        for i in range(WSPR_SYMBOL_COUNT):
             msg[RIDX[i]] = encoded[i]
-        for i in range(162):
+        for i in range(WSPR_SYMBOL_COUNT):
             yield 2*msg[i]+SYNCV[i]
+    def __len__(self):
+        return WSPR_SYMBOL_COUNT
 
     @staticmethod
     def normalize_callsign(callsign):
@@ -182,14 +187,14 @@ async def main():
     async with GenWSPRCode(callsign = callsign, 
                         grid     = grid,
                         power    = power) as gen:
-        syms = [sym for sym in gen.gen_symbols()]
+        syms = [sym for sym in gen]
         print('BY GRID')
         print(syms)
 
     async with GenWSPRCode(callsign = callsign, 
                         latlon   = latlon,
                         power    = power) as gen:
-        syms = [sym for sym in gen.gen_symbols()]
+        syms = [sym for sym in gen]
         print('BY LATLON')
         print(syms)
 
