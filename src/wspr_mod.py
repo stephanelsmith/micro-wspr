@@ -49,11 +49,11 @@ async def read_wspr_from_pipe(wspr_q,
     except Exception as err:
         print_exc(err)
 
-async def outputter(code_q,
-                    out_file = '-', # - | null
-                    Tsym     = 0,   # ms delay between each symbol
-                    verbose  = False,
-                    ):
+async def output_codes(code_q,
+                       out_file = '-', # - | null
+                       Tsym     = 0,   # ms delay between each symbol
+                       verbose  = False,
+                       ):
     write = sys.stdout.buffer.write
     flush = sys.stdout.buffer.flush
     try:
@@ -117,7 +117,7 @@ async def main():
         return
 
     eprint('# WSPR MOD')
-    eprint(args)
+    # eprint(args)
     eprint('# IN   {}'.format(args['in']['file']))
     eprint('# OUT  {}'.format(args['out']['file']))
 
@@ -127,11 +127,11 @@ async def main():
 
     tasks = []
     try:
-        tasks.append(asyncio.create_task(outputter(code_q,
-                                                   out_file = args['out']['file'],
-                                                   Tsym     = args['args']['Tsym'], 
-                                                   verbose  = args['args']['verbose'],
-                                                   )))
+        tasks.append(asyncio.create_task(output_codes(code_q,
+                                                      out_file = args['out']['file'],
+                                                      Tsym     = args['args']['Tsym'], 
+                                                      verbose  = args['args']['verbose'],
+                                                      )))
         # wspr_encoder, convert WSPR messages into AFSK samples
         tasks.append(asyncio.create_task(wspr_encoder(wspr_q, 
                                                       code_q,

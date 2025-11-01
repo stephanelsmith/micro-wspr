@@ -88,6 +88,7 @@ def tone_parse_args(args):
             'verbose' : False,
             'quiet'   : False,
             'rate'    : 22050,
+            'foff'    : 1500,
         },
         'in' : {
             'file'  : '-', #from stdin
@@ -111,6 +112,7 @@ wspr_tone.py
 
 OPTIONS:
 -r, --rate       22050 (default)
+-foff            frequency offset, 1400 <= 1500 (default) <= 1600 Hz
 -v, --verbose    verbose intermediate output to stderr
 
 -t INPUT TYPE OPTIONS:
@@ -130,6 +132,8 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
             r['args']['rate'] = get_arg_val(args, '--rate', int)
         if '-r' in args:
             r['args']['rate'] = get_arg_val(args, '-r', int)
+        if '-foff' in args:
+            r['args']['foff'] = get_arg_val(args, '-foff', int)
         if '-v' in args or '-verbose' in args:
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
