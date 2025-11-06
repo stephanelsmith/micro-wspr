@@ -22,7 +22,7 @@ cd ports/unix
 ```
 #### Build micropython with C modules
 ```
-make USER_C_MODULES=~/micro-aprs/upy/c_modules
+make USER_C_MODULES=~/micro-wspr/upy/c_modules
 ```
 #### If using bash, link the micropython executable into your home/bin folder.
 ```
