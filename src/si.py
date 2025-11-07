@@ -89,6 +89,9 @@ def init_clk(i2c,
              pll = b'a',
              a   = 30, b = 0, c = 1,
              ):
+    # Valid Multisynth divider ratios are 4, 6, 8, and any fractional value between 8 + 1/1,048,575 and 2048. This
+    # means that if any output is greater than 112.5 MHz (900 MHz/8), then this output frequency sets one of the
+    # VCO frequencies.
     clkctrl = None
     clkpll  = None
     synth = None
@@ -107,11 +110,10 @@ def init_clk(i2c,
         clkpll = b'\x2F'
 
     if clkctrl and clkpll:
-        print(1)
         i2c.writeto_mem(_SI5351_ADDRESS, clkctrl, clkpll)
 
     if a < 4 or a > 2048:
-        raise Exception('multiplier 4-2048PLL_APLL_A')
+        raise Exception('multiplier 4-2048')
     
     # Formula for splitting up the numbers to register data, see AN619 
     p1 = 128 * a +  (128 * b // c) - 512; 
@@ -127,7 +129,6 @@ def init_clk(i2c,
     buf[5] = ((p3 & 0x000F0000) >> 12) | ((p2 & 0x000F0000) >> 16)
     buf[6] = (p2 & 0x0000FF00) >> 8
     buf[7] = p2 & 0x000000FF
-    print(2)
     if synth and buf:
         i2c.writeto_mem(_SI5351_ADDRESS, synth, buf);
 
