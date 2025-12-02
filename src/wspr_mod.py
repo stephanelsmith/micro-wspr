@@ -17,6 +17,8 @@ from lib.compat import get_stdin_streamreader
 from wspr import WSPR
 from wspr.encoder import GenWSPRCode
 
+from afsk.func import create_afsk_tone_gen
+
 try:
     from rich import print
 except ImportError:
@@ -56,14 +58,25 @@ async def output_codes(code_q,
                        ):
     write = sys.stdout.buffer.write
     flush = sys.stdout.buffer.flush
+
+    tone_offset = 1500
+    tone_spacing = 12000/8192
+    tone_gen = create_afsk_tone_gen(fs     = 22050,
+                                    afsks  = (tone_offset+i*tone_spacing for i in range(4)),
+                                    signed = True,
+                                    ampli  = 0x7fff,
+                                    baud   = 1/Tsym,
+                                    )
+
     try:
         while True:
             b = await code_q.get()
             for i,s in enumerate(b):
                 if verbose:
                     eprint(s, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
-                write(s.to_bytes(2, 'little', signed=False))
-                flush()
+                if out_file == '-':
+                    write(s.to_bytes(2, 'little', signed=False))
+                    flush()
                 await asyncio.sleep(Tsym/1000)
             code_q.task_done()
     except asyncio.CancelledError:
