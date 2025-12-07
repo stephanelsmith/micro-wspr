@@ -1,10 +1,16 @@
 
-
-
-
 echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -t null -t -
-echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -Tsym 0 -t null -t -
 echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -Tsym wspr -t null -t -
+echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -Tsym wspr | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test.wav
+echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -Tsym wspr | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 11025 - -t wav test.wav
+atest test/test.wav
 
-echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v - | python wspr_tone.py -v -
+k9an-wsprd -f 10.1387 wspr30m.wav
+k9an-wsprd -f 14.0956 wspr30m.wav
+k9an-wsprd wspr30m.wav
+k9an-wsprd test.wav
+
+
+sox -t wav wspr30m.wav -t raw -b 16 -e signed-integer -c 1 -r 22050 - | k9an-wsprd -
+
 

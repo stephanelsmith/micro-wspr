@@ -56,34 +56,46 @@ async def output_codes(code_q,
                        Tsym     = 0,   # ms delay between each symbol
                        verbose  = False,
                        ):
-    write = sys.stdout.buffer.write
-    flush = sys.stdout.buffer.flush
-
-    tone_offset = 1500
-    tone_spacing = 12000/8192
-    tone_gen = create_afsk_tone_gen(fs     = 22050,
-                                    afsks  = (tone_offset+i*tone_spacing for i in range(4)),
-                                    signed = True,
-                                    ampli  = 0x7fff,
-                                    baud   = 1/Tsym,
-                                    )
-
     try:
+        write = sys.stdout.buffer.write
+        flush = sys.stdout.buffer.flush
+
+        tone_offset = 1500
+        tone_spacing = 12000/8192
+        afsks = list(tone_offset+i*tone_spacing for i in range(4))
+        tone_gen = create_afsk_tone_gen(fs     = 22050,
+                                        afsks  = afsks,
+                                        signed = True,
+                                        ampli  = 0xfff,
+                                        baud   = 1/(Tsym/1000) if Tsym else 110.6/162,
+                                        )
+        if out_file == '-':
+            z = 0
+            for i in range(22050):
+                write(z.to_bytes(2, 'little', signed=True))
+
         while True:
             b = await code_q.get()
-            for i,s in enumerate(b):
+            for i,c in enumerate(b):
                 if verbose:
-                    eprint(s, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
+                    eprint(c, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
                 if out_file == '-':
-                    write(s.to_bytes(2, 'little', signed=False))
+                    for s in tone_gen(c):
+                        write(s.to_bytes(2, 'little', signed=True))
                     flush()
-                await asyncio.sleep(Tsym/1000)
+                # await asyncio.sleep(Tsym/1000)
             code_q.task_done()
+
+        if out_file == '-':
+            z = 0
+            for i in range(22050):
+                write(z.to_bytes(2, 'little', signed=True))
+
     except asyncio.CancelledError:
         raise
     except Exception as err:
         print_exc(err)
-
+        raise
 
 async def wspr_encoder(wspr_q,
                        code_q,
@@ -142,6 +154,7 @@ async def main():
     try:
         tasks.append(asyncio.create_task(output_codes(code_q,
                                                       out_file = args['out']['file'],
+                                                      fs       = args['args']['fs'],
                                                       Tsym     = args['args']['Tsym'], 
                                                       verbose  = args['args']['verbose'],
                                                       )))

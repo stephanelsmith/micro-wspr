@@ -14,6 +14,8 @@ def mod_parse_args(args):
         'args' : {
             'verbose' : False,
             'quiet'   : False,
+            'rate'    : 22050,
+            'foff'    : 1500,
             'Tsym'    : 0,
         },
         'in' : {
@@ -38,6 +40,8 @@ wspr_mod.py
 
 OPTIONS:
 -v, --verbose    verbose intermediate output to stderr
+-r, --rate       22050 (default)
+-foff            frequency offset, 1400 <= 1500 (default) <= 1600 Hz
 -Tsym            Symbol period in ms.  default 0. Use 'wspr' for standard ~687ms period
 
 -t INPUT TYPE OPTIONS:
