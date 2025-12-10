@@ -51,45 +51,59 @@ async def read_wspr_from_pipe(wspr_q,
     except Exception as err:
         print_exc(err)
 
-async def output_codes(code_q,
+async def output_codes(wsprcodes_q,
                        out_file = '-', # - | null
                        Tsym     = 0,   # ms delay between each symbol
+                       fs       = 22050,
+                       foff     = 1500,
                        verbose  = False,
                        ):
     try:
         write = sys.stdout.buffer.write
         flush = sys.stdout.buffer.flush
 
-        tone_offset = 1500
-        tone_spacing = 12000/8192
-        afsks = list(tone_offset+i*tone_spacing for i in range(4))
-        tone_gen = create_afsk_tone_gen(fs     = 22050,
+        tsym = 8192/12000 # 8192/12000 symbol period is ~683ms
+        fsym = 1/tsym     # symbol spacing is ~1.46Hz
+        k = 0
+        afsks = list(foff+i*fsym for i in range(4))
+        eprint(afsks)
+        tone_gen = create_afsk_tone_gen(fs     = fs,
                                         afsks  = afsks,
                                         signed = True,
-                                        ampli  = 0xfff,
-                                        baud   = 1/(Tsym/1000) if Tsym else 110.6/162,
+                                        ampli  = 0x1ff,
+                                        baud   = fsym,
                                         )
+        
+        # buffer 1 sec
         if out_file == '-':
-            z = 0
-            for i in range(22050):
-                write(z.to_bytes(2, 'little', signed=True))
+            for i in range(fs):
+                write(b'\x00\x00')
 
         while True:
-            b = await code_q.get()
-            for i,c in enumerate(b):
-                if verbose:
-                    eprint(c, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
-                if out_file == '-':
-                    for s in tone_gen(c):
-                        write(s.to_bytes(2, 'little', signed=True))
-                    flush()
-                # await asyncio.sleep(Tsym/1000)
-            code_q.task_done()
+            # bs is byte array of codes 162 bits
+            bs = await wsprcodes_q.get()
+            try:
+                for i,b in enumerate(bs):
+                    if verbose:
+                        eprint(b, end='\n' if (i+1)%18==0 else '  ' if (i+1)%6==0 else ' ')
+                    if out_file == '-':
+                        for j,s in enumerate(tone_gen(b)):
+                            # if j == 0:
+                                # # eprint('{} {} {}'.format(i, k*1/fs, tsym*i))
+                                # eprint('{} {}'.format(i, k*1/fs))
+                                # # s += 20000
+                            write(s.to_bytes(2, 'little', signed=True))
+                            k += 1
+                        flush()
+                    # await asyncio.sleep(Tsym/1000)
+            finally:
+                wsprcodes_q.task_done()
+                # eprint('=duration {}'.format(k*1/fs))
 
+        # buffer 1 sec
         if out_file == '-':
-            z = 0
-            for i in range(22050):
-                write(z.to_bytes(2, 'little', signed=True))
+            for i in range(fs):
+                write(b'\x00\x00')
 
     except asyncio.CancelledError:
         raise
@@ -98,7 +112,7 @@ async def output_codes(code_q,
         raise
 
 async def wspr_encoder(wspr_q,
-                       code_q,
+                       wsprcodes_q,
                        verbose = False,
                        ):
     try:
@@ -123,10 +137,10 @@ async def wspr_encoder(wspr_q,
                                    grid     = wspr.pos,
                                    power    = wspr.pwr) as gen:
                 b = bytearray(s for s in gen)
-                await code_q.put(b)
+                await wsprcodes_q.put(b)
 
             # wait until queues are done
-            await code_q.join()
+            await wsprcodes_q.join()
 
             wspr_q.task_done()
 
@@ -148,19 +162,20 @@ async def main():
 
     # WSPR queue, these items are queued in from stdin and out in wspr_encoder
     wspr_q = Queue()
-    code_q = Queue()
+    wsprcodes_q = Queue()
 
     tasks = []
     try:
-        tasks.append(asyncio.create_task(output_codes(code_q,
+        tasks.append(asyncio.create_task(output_codes(wsprcodes_q,
                                                       out_file = args['out']['file'],
-                                                      fs       = args['args']['fs'],
+                                                      fs       = args['args']['rate'],
+                                                      foff     = args['args']['foff'],
                                                       Tsym     = args['args']['Tsym'], 
                                                       verbose  = args['args']['verbose'],
                                                       )))
         # wspr_encoder, convert WSPR messages into AFSK samples
         tasks.append(asyncio.create_task(wspr_encoder(wspr_q, 
-                                                      code_q,
+                                                      wsprcodes_q,
                                                       verbose = args['args']['verbose'],
                                                       )))
 

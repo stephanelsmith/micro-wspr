@@ -92,7 +92,7 @@ def get_sin_table(size   = 1024,
             # else:
             return array('H', (int(0x7fff+ampli*math.sin(x)) for x in frange(0,2*math.pi,2*math.pi/size)))
 
-_RESIDUE_SIZE = const(10000)
+_RESIDUE_SIZE = const(20000)
 _SINTBL_SIZE  = const(1024)
 def create_afsk(fs     = 22050, # sampling frequency
                 afsks  = [2200, 1200], # space (0) and mark (1)
@@ -146,10 +146,6 @@ def create_afsk(fs     = 22050, # sampling frequency
     else:
         def inner(k:int)->int:
             nonlocal phaseint, phaseres
-            # phaseint += stepint[k] 
-            # phaseres += stepres[k] 
-            # phaseint += phaseres // _RESIDUE_SIZE
-            # phaseres %= _RESIDUE_SIZE
             phaseres += stepres[k] 
             phaseint += stepint[k] + phaseres // _RESIDUE_SIZE
             phaseres %= _RESIDUE_SIZE

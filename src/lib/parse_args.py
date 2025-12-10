@@ -61,6 +61,10 @@ outfile       '-' (default) | 'null' (no output) | '*.wav' (wave file) | 'play' 
             r['args']['verbose'] = True
         if '-q' in args or '-quiet' in args:
             r['args']['quiet'] = True
+        if '-r' in args:
+            r['args']['rate'] = get_arg_val(args, '-r', int)
+        if '-foff' in args:
+            r['args']['foff'] = get_arg_val(args, '-foff', int)
         if '-Tsym' in args:
             r['args']['Tsym'] = get_arg_val(args, '-Tsym')
             if r['args']['Tsym'] == 'wspr':
