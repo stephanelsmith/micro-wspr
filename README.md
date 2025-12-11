@@ -2,7 +2,7 @@
 
 A python/micropython based library for encoding and modulating WSPR packets in AFSK audio.
 
-The purpose of this library is to thread-the-needle of both enabling WSPR encoding and audio modulation from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention Cpython and Pypy! 
+The purpose of this library is to enabe WSPR encoding and audio modulation from PC to microcontroller while maintaining portability and readability of python.  This library is optimized for embedded systems, especially [micropython supported targets and platforms ](https://github.com/micropython/micropython#supported-platforms--architectures) and small computers, not to mention Cpython and Pypy! 
 
 In practice this means we:
 * Avoid floating point and math libraries and dependencies in critical sections.  
@@ -22,44 +22,15 @@ In practice this means we:
 
 ### 🫰 Basic usage
 From the ```micro-wspr/src``` folder, try
+#### 📝 Generate WSPR codes only
 ```
-python wspr_mod.py -h
-```
-```
-WSPR MOD
-© Stéphane Smith (KI5TOF) 2025
-
-wspr_mod.py parses input AX25 WSPR strings and outputs AFSK samples in signed 16 bit little endian format.
-
-Usage:
-wspr_mod.py [options] (-t outfile) (-t infile)
-wspr_mod.py [options] (-t infile)
-wspr_mod.py [options]
-wspr_mod.py
-
-OPTIONS:
--v, --verbose    verbose intermediate output to stderr
--r, --rate       22050 (default)
--foff            frequency offset, 1400 <= 1500 (default) <= 1600 Hz
--Tsym            Symbol period in ms.  default 0. Use 'wspr' for standard ~687ms period
-
--t INPUT TYPE OPTIONS:
-infile       '-' (default)
-
--t OUTPUT TYPE OPTIONS:
-outfile       '-' (default) | 'null' (no output)
-```
-
-### 📝 Encode AX25 APRS string in verbose mode
-```-v``` verbose mode is designed to show the intermediate steps (on stderr).  For this example, we suppress output (setting stdout to null).
-```
-echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -t null -t -
+echo "KI5TOF FN42 37" | python wspr_mod.py -v -t null -t -
 ```
 ```
 # WSPR MOD
 # IN   -
 # OUT  null
-===== WSPR ENCODE >>>>> KI5TOF>WSPR:=FN42:37
+===== WSPR ENCODE >>>>> KI5TOF FN42 37
 3 1 0 0 0 0  0 0 3 2 0 0  3 3 1 2 0 0
 3 0 2 3 2 3  3 1 1 2 0 2  2 0 2 0 3 2
 0 1 2 3 0 0  2 0 2 0 1 2  3 1 0 2 3 1
@@ -68,6 +39,30 @@ echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -t null -t -
 3 2 1 0 3 2  2 0 1 0 2 0  2 0 3 2 0 3
 0 0 3 1 1 0  3 3 0 2 1 1  2 3 2 2 2 1
 3 3 2 0 2 0  0 1 0 3 0 0  3 3 0 2 0 2
+0 0 2 3 3 0  3 2 1 1 2 0  2 3 3 2 0 0
+```
+
+#### 📝 Generate WSPR wave file for wsprd decode
+##### [Thank you to wspr-cui](https://github.com/jj1bdx/wspr-cui/tree/main) for documenting wsprd requires the wav file to have the following properties.
+* WAV header (first 22 bytes) are ignored
+* Format: fixed to S16\_LE, 12000Hz, monaural (1 channel)
+* Length: 114 seconds (see `readwavfile()` in wsprd.c) 
+```
+echo "KI5TOF FN42 37" | python wspr_mod.py -r 12000 | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 12000 - -t wav test.wav
+wsprd test.wav
+```
+```
+test   9  0.0   0.001498  0  KI5TOF FN42 37
+test  40 -0.0   0.001502  0  KI5TOF FN42 37
+test -21 -0.4   0.001572  0  KI5TOF FN42 37
+<DecodeFinished>
+```
+
+
+#### 📝 Generate WSPR wave file for transmission
+Unlike the `wsprd` version, we'll generate a higher quality and more typical wave files sampled at 22050.  This file will *not* properly be decoded by wsprd!
+```
+echo "KI5TOF FN42 37" | python wspr_mod.py -r 22050 | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test.wav
 ```
 
 
