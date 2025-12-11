@@ -11,7 +11,7 @@ _ORD_z = const(122)
 
 class WSPR():
 
-    def __init__(self, wsprstr    = b'', # aprs like wspr string, eg. b'KI5TOF>WSPR:=FN42:37'
+    def __init__(self, wspraprs    = b'', # aprs like wspr string, eg. b'KI5TOF>WSPR:=FN42:37'
                        src        = b'',
                        dst        = b'WSPR',
                        pos        = b'xxxx', # maiden head
@@ -25,40 +25,40 @@ class WSPR():
 
         self.verbose = verbose
 
-        if wsprstr:
-            self.from_wsprstr(wsprstr = wsprstr)
+        if wspraprs:
+            self.from_wspraprs(wspraprs = wspraprs)
 
-    def from_wsprstr(self, wsprstr):
+    def from_wspraprs(self, wspraprs):
         # from a string like b'KI5TOF>WSPR:=FN42:37'
 
-        if isinstance(wsprstr, str):
-            wsprstr = wsprstr.encode()
+        if isinstance(wspraprs, str):
+            wspraprs = wspraprs.encode()
 
-        i = wsprstr.find(b'>')
+        i = wspraprs.find(b'>')
         if not i:
-            raise Exception('could not find source {}'.format(wsprstr))
+            raise Exception('could not find source {}'.format(wspraprs))
 
         for j in range(i):
-            o = wsprstr[j]
+            o = wspraprs[j]
             if o >= _ORD_A and o <= _ORD_Z or\
                o >= _ORD_a and o <= _ORD_z:
                 break
-        self.src = wsprstr[:i]
+        self.src = wspraprs[:i]
         j = i + 1
 
-        i = wsprstr.find(b':=',j)
-        self.dst = wsprstr[j:i]
+        i = wspraprs.find(b':=',j)
+        self.dst = wspraprs[j:i]
         j = i + 2
 
-        i = wsprstr.find(b':',j)
-        self.pos = wsprstr[j:i]
+        i = wspraprs.find(b':',j)
+        self.pos = wspraprs[j:i]
         j = i + 1
-        self.pwr = wsprstr[j:]
+        self.pwr = wspraprs[j:]
 
     def __repr__(self):
-        return '{}>{}:={}:{}'.format(self.src, self.dst, self.pos, self.pwr)
+        return '{} {} {}'.format(self.src, self.pos, self.pwr)
 
     def __rich__(self):
-        return "[bold bright_green]{}[/bold bright_green]>[bright_yellow]{}:=[magenta]{}[/magenta]:[blue]{}[blue]".format(self.src.decode(), self.dst.decode(), self.pos.decode(), self.pwr.decode())
+        return "[bold bright_green]{}[/bold bright_green] [magenta]{}[/magenta] [blue]{}[blue]".format(self.src.decode(), self.pos.decode(), self.pwr.decode())
 
 

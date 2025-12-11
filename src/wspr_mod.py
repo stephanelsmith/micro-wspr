@@ -119,9 +119,12 @@ async def wspr_encoder(wspr_q,
         while True:
             # get wspr from input
             wsprstr = await wspr_q.get()
+            src,pos,pwr = wsprstr.split()
 
             try:
-                wspr = WSPR(wsprstr  = wsprstr,
+                wspr = WSPR(src      = src,
+                            pos      = pos,
+                            pwr      = pwr,
                             verbose  = True,
                             )
 
@@ -130,9 +133,10 @@ async def wspr_encoder(wspr_q,
             except Exception as err:
                 eprint('# bad wspr input string:{}\n{}'.format(wsprstr,err))
                 continue
-           
-            eprint('===== WSPR ENCODE >>>>>',end=' ')
-            eprint(wspr)
+          
+            if verbose:
+                eprint('===== WSPR ENCODE >>>>>',end=' ')
+                eprint(wspr)
             async with GenWSPRCode(callsign = wspr.src, 
                                    grid     = wspr.pos,
                                    power    = wspr.pwr) as gen:
@@ -155,10 +159,11 @@ async def main():
     if args == None:
         return
 
-    eprint('# WSPR MOD')
-    # eprint(args)
-    eprint('# IN   {}'.format(args['in']['file']))
-    eprint('# OUT  {}'.format(args['out']['file']))
+    if args['args']['verbose']:
+        eprint('# WSPR MOD')
+        # eprint(args)
+        eprint('# IN   {}'.format(args['in']['file']))
+        eprint('# OUT  {}'.format(args['out']['file']))
 
     # WSPR queue, these items are queued in from stdin and out in wspr_encoder
     wspr_q = Queue()
