@@ -14,14 +14,61 @@ In practice this means we:
 * Single threaded, multitask friendly
 	* :+1::+1: Asyncio
 
-## :mortar_board: Tutorials
-
 ## :horse_racing: **Start here!**
-Basic command line for encoding and APRS strings to AFSK audio samples and the reverse.
+### Build instructions
 * [Micropython](docs/ports/upy/README.md) unix build instructions, and encode/decode examples via cli.
-* [ESP32-S3 - working around missing DAC](docs/ports/dac/README.md)
 * [TinyS3](docs/ports/tinys3/README.md), ESP32S3 build isntructions on the TinyS3 (ESP32-S3).
 * [TinyC6](docs/ports/tinyc6/README.md), ESP32C6 build isntructions on the TinyC6 (ESP32-C6).
+
+### 🫰 Basic usage
+From the ```micro-wspr/src``` folder, try
+```
+python wspr_mod.py -h
+```
+```
+WSPR MOD
+© Stéphane Smith (KI5TOF) 2025
+
+wspr_mod.py parses input AX25 WSPR strings and outputs AFSK samples in signed 16 bit little endian format.
+
+Usage:
+wspr_mod.py [options] (-t outfile) (-t infile)
+wspr_mod.py [options] (-t infile)
+wspr_mod.py [options]
+wspr_mod.py
+
+OPTIONS:
+-v, --verbose    verbose intermediate output to stderr
+-r, --rate       22050 (default)
+-foff            frequency offset, 1400 <= 1500 (default) <= 1600 Hz
+-Tsym            Symbol period in ms.  default 0. Use 'wspr' for standard ~687ms period
+
+-t INPUT TYPE OPTIONS:
+infile       '-' (default)
+
+-t OUTPUT TYPE OPTIONS:
+outfile       '-' (default) | 'null' (no output)
+```
+
+### 📝 Encode AX25 APRS string in verbose mode
+```-v``` verbose mode is designed to show the intermediate steps (on stderr).  For this example, we suppress output (setting stdout to null).
+```
+echo "KI5TOF>WSPR:=FN42:37" | python wspr_mod.py -v -t null -t -
+```
+```
+# WSPR MOD
+# IN   -
+# OUT  null
+===== WSPR ENCODE >>>>> KI5TOF>WSPR:=FN42:37
+3 1 0 0 0 0  0 0 3 2 0 0  3 3 1 2 0 0
+3 0 2 3 2 3  3 1 1 2 0 2  2 0 2 0 3 2
+0 1 2 3 0 0  2 0 2 0 1 2  3 1 0 2 3 1
+2 1 2 0 2 1  1 2 1 2 0 2  0 3 1 0 1 0
+3 0 3 2 3 2  2 1 0 0 1 2  3 1 0 0 2 1
+3 2 1 0 3 2  2 0 1 0 2 0  2 0 3 2 0 3
+0 0 3 1 1 0  3 3 0 2 1 1  2 3 2 2 2 1
+3 3 2 0 2 0  0 1 0 3 0 0  3 3 0 2 0 2
+```
 
 
 ## :raised_hands: Acknowledgements
@@ -35,6 +82,7 @@ Basic command line for encoding and APRS strings to AFSK audio samples and the r
 	- [genwsprcode.py](https://github.com/PH0TRA/wspr) Converted genwspr to python3.
 	- [Raspberry Pi version](https://blog.marxy.org/2024/09/python-code-to-generate-wspr-audio-tones.html)
 		- [wsprgen.py](https://gist.github.com/peterbmarks/339e5ae83b5351151137679b8f527466)
+- [wspr-cui](https://github.com/jj1bdx/wspr-cui) Wspr code
 
 ## License
 MIT License

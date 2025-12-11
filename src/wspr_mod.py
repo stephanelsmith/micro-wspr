@@ -66,7 +66,7 @@ async def output_codes(wsprcodes_q,
         fsym = 1/tsym     # symbol spacing is ~1.46Hz
         k = 0
         afsks = list(foff+i*fsym for i in range(4))
-        eprint(afsks)
+        # eprint(afsks)
         tone_gen = create_afsk_tone_gen(fs     = fs,
                                         afsks  = afsks,
                                         signed = True,
