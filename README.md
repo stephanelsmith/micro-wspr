@@ -43,7 +43,7 @@ echo "KI5TOF FN42 37" | python wspr_mod.py -v -t null -t -
 ```
 
 #### 📝 Generate WSPR wave file for wsprd decode
-##### [Thank you to wspr-cui](https://github.com/jj1bdx/wspr-cui/tree/main) for documenting wsprd requires the wav file to have the following properties.
+[Thank you to wspr-cui](https://github.com/jj1bdx/wspr-cui/tree/main) for documenting wsprd requires the wav file to have the following properties.
 * WAV header (first 22 bytes) are ignored
 * Format: fixed to S16\_LE, 12000Hz, monaural (1 channel)
 * Length: 114 seconds (see `readwavfile()` in wsprd.c) 
