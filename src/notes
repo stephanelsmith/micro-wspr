@@ -8,13 +8,8 @@ echo "KI5TOF FN42 37" | python wspr_mod.py -r 12000 | sox -t raw -b 16 -e signed
 # for output
 echo "KI5TOF FN42 37" | python wspr_mod.py -r 22050 | sox -t raw -b 16 -e signed-integer -c 1 -v 1.0 -r 22050 - -t wav test.wav
 
-wsprd -f 10.1387 wspr30m.wav
-wsprd -f 14.0956 wspr30m.wav
-wsprd wspr30m.wav
+wsprd -f 10.1387 test.wav
+wsprd -f 14.0956 test.wav
 wsprd test.wav
-
-wsprsim -c "KI5TOF FN42 37"
-
-
 
 
