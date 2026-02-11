@@ -189,36 +189,6 @@ static mp_obj_t mp_fir_core(size_t n_args, const mp_obj_t *args) {
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(fir_core_obj, 5, 5, mp_fir_core);
 
-// POWER METER 
-// ARGS:  arr, v, idx
-// OUT : tuple(idx, o)
-static mp_obj_t mp_power_meter_core(mp_obj_t buf_obj, mp_obj_t v_obj, mp_obj_t idx_obj) {
-    mp_obj_array_t *buf_array = MP_OBJ_TO_PTR(buf_obj);
-    int32_t v = mp_obj_get_int(v_obj);
-    int32_t idx = mp_obj_get_int(idx_obj);
-
-    int32_t o = 0;
-    int32_t siz = buf_array->len;
-    int32_t *arr = buf_array->items;
-
-    arr[idx] = v;
-    for(int32_t i=0; i<siz; i++){
-        int32_t k = idx-i>=0 ? idx-i : siz+idx-i; // emulate python mod for negative numbers
-        o += ((int64_t)arr[k]) *  ((int64_t)arr[k]);
-    }
-    o = isqrt32(o);
-
-    return mp_obj_new_int(o);
-    
-    // // THIS IS SLOW! Allocating tuple is a performance hit
-    // idx = (idx+1)%siz; // skip not returning index
-    // mp_obj_t ret = mp_obj_new_tuple(2, NULL);
-    // mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(ret);
-    // tuple->items[0] = mp_obj_new_int(idx);
-    // tuple->items[1] = mp_obj_new_int(o);
-    // return ret;
-}
-static MP_DEFINE_CONST_FUN_OBJ_3(power_meter_core_obj, mp_power_meter_core);
 
 
 
@@ -233,7 +203,6 @@ static const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_isqrt), MP_ROM_PTR(&isqrt_obj) },
     { MP_ROM_QSTR(MP_QSTR_sign), MP_ROM_PTR(&sign_obj) },
     { MP_ROM_QSTR(MP_QSTR_fir_core), MP_ROM_PTR(&fir_core_obj) },
-    { MP_ROM_QSTR(MP_QSTR_power_meter_core), MP_ROM_PTR(&power_meter_core_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi32), MP_ROM_PTR(&utoi32_obj) },
     { MP_ROM_QSTR(MP_QSTR_utoi16), MP_ROM_PTR(&utoi16_obj) },
     { MP_ROM_QSTR(MP_QSTR_bs16toi), MP_ROM_PTR(&bs16toi_obj) },

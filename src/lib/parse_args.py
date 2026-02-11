@@ -26,7 +26,7 @@ def mod_parse_args(args):
         },
     }
 
-    if '-h' in args or '--help' in args or '-help' in args:
+    if '-h' in args or '--help' in args or '-help' in args or len(args) <= 1:
         print(f'''WSPR MOD
 © Stéphane Smith (KI5TOF) {year}
 

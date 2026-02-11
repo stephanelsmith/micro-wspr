@@ -4,7 +4,6 @@ import asyncio
 import gc
 
 from machine import Pin, PWM, Timer
-from array import array
 
 from asyncio import Event
 from micropython import const
@@ -74,7 +73,7 @@ async def start():
         sys.print_exception(err)
     finally:
         # pwm.deinit()
-        gc_task.cancel()
+        # gc_task.cancel()
 
 def main():
     try:
