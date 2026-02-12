@@ -14,11 +14,13 @@
 # converted to module for Python3 july 2017 by Marc Burgmeijer PH0TRA
 # refactored and optimized july 2025 by Stephane Smith KI5TOF
 
-import sys, string
+import sys
 import asyncio
 from array import array
 
 WSPR_SYMBOL_COUNT = 162
+ASCII_DIGITS = '0123456789'
+ASCII_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 SYNCV = array('B',[1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1,
          1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
@@ -88,7 +90,7 @@ class GenWSPRCode:
     @staticmethod
     def normalize_callsign(callsign):
         callsign = list(callsign)
-        idx = next((i for i, ch in enumerate(callsign) if ch in string.digits), None)
+        idx = next((i for i, ch in enumerate(callsign) if ch in ASCII_DIGITS), None)
         newcallsign = 6 * [" "]
         newcallsign[2 - idx:2 - idx + len(callsign)] = callsign
         return ''.join(newcallsign)
@@ -97,10 +99,10 @@ class GenWSPRCode:
     def encode_callsign(cls, callsign):
         callsign = callsign.upper()
         callsign = cls.normalize_callsign(callsign)
-        lds = string.digits + string.ascii_uppercase + " "
-        ld = string.digits + string.ascii_uppercase
-        d = string.digits
-        ls = string.ascii_uppercase + " "
+        lds = ASCII_DIGITS + ASCII_UPPER + " "
+        ld = ASCII_DIGITS + ASCII_UPPER
+        d = ASCII_DIGITS
+        ls = ASCII_UPPER + " "
         acc = lds.find(callsign[0])
         acc = acc * len(ld) + ld.find(callsign[1])
         acc = acc * len(d) + d.find(callsign[2])

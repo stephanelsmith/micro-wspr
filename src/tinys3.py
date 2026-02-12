@@ -65,7 +65,7 @@ async def pwm_test():
 async def start():
 
     try:
-        # gc_task = asyncio.create_task(gc_coro())
+        gc_task = asyncio.create_task(gc_coro())
         await pwm_test()
         await Event().wait()
 
@@ -73,7 +73,7 @@ async def start():
         sys.print_exception(err)
     finally:
         # pwm.deinit()
-        # gc_task.cancel()
+        gc_task.cancel()
 
 def main():
     try:
